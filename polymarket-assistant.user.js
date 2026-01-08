@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Polymarket Favorites Assistant
 // @namespace    https://polymarket.com/
-// @version      1.0.1
+// @version      1.0.2
 // @description  收藏市场和交易者，支持备注、标签、筛选和排序 | Track markets and traders with notes, tags, filters and sorting
 // @author       Polymarket Toolbox
 // @match        https://polymarket.com/*
@@ -891,6 +891,8 @@
             if (editBtn) {
                 e.stopPropagation();
                 const type = editBtn.dataset.type;
+                // EDIT still uses index for inline edit state management as it relies on array position for rendering input
+                // But we can check if it matches ID to be safe, or just use index as it's less destructive than delete
                 const index = parseInt(editBtn.dataset.index);
                 console.log('[PM] Edit clicked:', type, index);
                 window.pmOpenEdit(type, index);
@@ -900,14 +902,26 @@
             const deleteBtn = e.target.closest('.pm-delete-btn');
             if (deleteBtn) {
                 e.stopPropagation();
-                const type = deleteBtn.dataset.type;
-                const index = parseInt(deleteBtn.dataset.index);
-                console.log('[PM] Delete clicked:', type, index);
-                if (type === 'market') {
-                    window.pmRemoveMarket(index);
-                } else {
-                    window.pmRemoveTrader(index);
+                // Improved feedback: immediately disable button and dim card
+                deleteBtn.disabled = true;
+                const card = deleteBtn.closest('.pm-card');
+                if (card) {
+                    card.style.opacity = '0.5';
+                    card.style.pointerEvents = 'none';
                 }
+
+                const type = deleteBtn.dataset.type;
+                const id = deleteBtn.dataset.id;
+                console.log('[PM] Delete clicked:', type, id);
+
+                // Allow UI update to happen
+                requestAnimationFrame(() => {
+                    if (type === 'market') {
+                        window.pmRemoveMarketById(id);
+                    } else {
+                        window.pmRemoveTraderById(id);
+                    }
+                });
                 return;
             }
 
@@ -1449,7 +1463,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                         </svg>
                     </button>
-                    <button class="pm-card-btn-small delete pm-delete-btn" data-type="market" data-index="${m.originalIndex}" title="Delete">
+                    <button class="pm-card-btn-small delete pm-delete-btn" data-type="market" data-id="${m.id}" title="Delete">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -1501,7 +1515,9 @@
         btn.querySelector('span').textContent = isFav ? t('favorited') : t('favorite');
     }
 
-    window.pmRemoveMarket = function (idx) {
+    window.pmRemoveMarketById = function (id) {
+        const idx = favoriteMarkets.findIndex(m => m.id === id);
+        if (idx === -1) return; // Already deleted
         favoriteMarkets.splice(idx, 1);
         saveMarkets();
         renderAll();
@@ -1597,7 +1613,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
                         </svg>
                     </button>
-                    <button class="pm-card-btn-small delete pm-delete-btn" data-type="trader" data-index="${trader.originalIndex}" title="Delete">
+                    <button class="pm-card-btn-small delete pm-delete-btn" data-type="trader" data-id="${trader.id}" title="Delete">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -1655,7 +1671,9 @@
         btn.querySelector('span').textContent = isFav ? t('favorited') : t('favorite');
     }
 
-    window.pmRemoveTrader = function (idx) {
+    window.pmRemoveTraderById = function (id) {
+        const idx = favoriteTraders.findIndex(t => t.id === id);
+        if (idx === -1) return;
         favoriteTraders.splice(idx, 1);
         saveTraders();
         renderAll();
