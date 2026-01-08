@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Polymarket Favorites Assistant
 // @namespace    https://polymarket.com/
-// @version      1.0.0
+// @version      1.0.1
 // @description  收藏市场和交易者，支持备注、标签、筛选和排序 | Track markets and traders with notes, tags, filters and sorting
 // @author       Polymarket Toolbox
 // @match        https://polymarket.com/*
@@ -34,9 +34,9 @@
             noTraders: '暂无收藏的交易者',
             editDetails: '编辑详情',
             noteName: '备注名称',
-            inputName: '输入自定义名称...',
-            tags: '标签分类',
-            tagsPlaceholder: '例如: 巨鲸, 关注, 高风险...',
+            inputName: '备注名称',
+            tags: '标签',
+            tagsPlaceholder: '标签 (空格分隔)',
             tagsHelper: '使用空格分隔多个标签',
             search: '搜索',
             searchPlaceholder: '搜索市场和交易者...',
@@ -601,6 +601,7 @@
             position: absolute;
             top: 12px;
             right: 12px;
+            z-index: 10;
             display: flex;
             gap: 4px;
             opacity: 0;
@@ -755,6 +756,8 @@
             outline: none;
             font-family: inherit;
             transition: border 0.2s;
+            position: relative;
+            z-index: 20;
         }
         .pm-inline-input:focus {
             border-color: var(--pm-accent);
