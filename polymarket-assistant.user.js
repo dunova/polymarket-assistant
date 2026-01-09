@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Polymarket Favorites Assistant
 // @namespace    https://polymarket.com/
-// @version      1.0.2
+// @version      1.0.3
 // @description  收藏市场和交易者，支持备注、标签、筛选和排序 | Track markets and traders with notes, tags, filters and sorting
 // @author       Polymarket Toolbox
 // @match        https://polymarket.com/*
@@ -505,8 +505,8 @@
             background: rgba(33, 38, 45, 0.6);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
+            padding: 10px;
+            margin-bottom: 6px;
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
@@ -525,9 +525,9 @@
         }
 
         .pm-card-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             background: #2d333b;
             display: flex;
             align-items: center;
@@ -543,10 +543,10 @@
         .pm-card-info { flex: 1; min-width: 0; }
 
         .pm-card-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--pm-text-primary);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             line-height: 1.4;
             padding-right: 60px;
         }
@@ -554,7 +554,7 @@
         .pm-card-note {
             font-size: 11px;
             color: var(--pm-text-secondary);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -565,13 +565,13 @@
         .pm-card-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 4px;
+            margin-bottom: 4px;
         }
         
         .pm-card-tag {
             font-size: 10px;
-            padding: 2px 7px;
+            padding: 2px 6px;
             border-radius: 6px;
             background: rgba(46, 122, 251, 0.1);
             color: var(--pm-accent);
@@ -582,18 +582,18 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 8px;
+            padding-top: 6px;
             border-top: 1px solid rgba(255,255,255,0.05);
         }
         
         .pm-prices {
             display: flex;
             gap: 12px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             font-family: 'Roboto Mono', monospace;
         }
-
+        
         .pm-price-yes { color: var(--pm-success); }
         .pm-price-no { color: var(--pm-danger); }
 
@@ -1189,19 +1189,18 @@
 
     // Tag color palette
     // Solid, muted tag colors - professional palette
+    // Tag color palette (Darker, High Contrast for White Text)
     const tagColors = [
-        '#FF6B6B',  // Coral red - 热情
-        '#4ECDC4',  // Turquoise - 清新
-        '#45B7D1',  // Sky blue - 专业
-        '#FFA07A',  // Light salmon - 温暖
-        '#98D8C8',  // Mint - 宁静
-        '#F7DC6F',  // Yellow - 活力
-        '#BB8FCE',  // Purple - 优雅
-        '#85C1E2',  // Light blue - 清爽
-        '#F8B88B',  // Peach - 柔和
-        '#B8E994',  // Light green - 自然
-        '#FAD7A0',  // Sand - 稳重
-        '#D7BDE2'   // Lavender - 浪漫
+        '#E63946', // Deep Red
+        '#2A9D8F', // Teal
+        '#22577A', // Navy Blue
+        '#E76F51', // Burnt Orange
+        '#7209B7', // Vibrant Purple
+        '#2D6A4F', // Forest Green
+        '#B5179E', // Magenta
+        '#C1121F', // Crimson
+        '#023E8A', // Deep Ocean
+        '#5F0F40'  // Dark Cherry
     ];
 
     function getTagColor(tag) {
