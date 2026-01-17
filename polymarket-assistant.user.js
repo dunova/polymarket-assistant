@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Polymarket Favorites Assistant
 // @namespace    https://polymarket.com/
-// @version      1.0.5
+// @version      1.0.6
 // @description  收藏市场和交易者，支持备注、标签、筛选和排序 | Track markets and traders with notes, tags, filters and sorting
 // @author       Polymarket Toolbox
 // @match        https://polymarket.com/*
@@ -305,24 +305,24 @@
         }
         .pm-resize-w {
             left: 0;
+            top: 15px;
+            bottom: 15px;
+            width: 8px;
+            cursor: ew-resize;
+        }
+        .pm-resize-n {
             top: 0;
-            bottom: 0;
-            width: 10px;
-            cursor: w-resize;
-        }
-        .pm-resize-s {
-            bottom: 0;
-            left: 0;
+            left: 15px;
             right: 0;
-            height: 10px;
-            cursor: s-resize;
+            height: 8px;
+            cursor: ns-resize;
         }
-        .pm-resize-sw {
-            bottom: 0;
+        .pm-resize-nw {
+            top: 0;
             left: 0;
             width: 15px;
             height: 15px;
-            cursor: sw-resize;
+            cursor: nwse-resize;
             z-index: 101;
         }
 
@@ -1148,42 +1148,55 @@
         let searchQuery = '';
         const searchInput = document.getElementById('pm-search-input');
         if (searchInput) {
-            // Inject Resize Handles
+            // Inject Resize Handles - Left edge (width), Top edge (height), Top-left corner (both)
             const resizeW = document.createElement('div');
             resizeW.className = 'pm-resize-handle pm-resize-w';
             panel.appendChild(resizeW);
 
-            const resizeS = document.createElement('div');
-            resizeS.className = 'pm-resize-handle pm-resize-s';
-            panel.appendChild(resizeS);
+            const resizeN = document.createElement('div');
+            resizeN.className = 'pm-resize-handle pm-resize-n';
+            panel.appendChild(resizeN);
 
-            const resizeSW = document.createElement('div');
-            resizeSW.className = 'pm-resize-handle pm-resize-sw';
-            panel.appendChild(resizeSW);
+            const resizeNW = document.createElement('div');
+            resizeNW.className = 'pm-resize-handle pm-resize-nw';
+            panel.appendChild(resizeNW);
 
             // Resize Logic
             const initResize = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 const startX = e.clientX;
                 const startY = e.clientY;
                 const startWidth = panel.offsetWidth;
                 const startHeight = panel.offsetHeight;
-                const direction = e.target.className.includes('pm-resize-w') ? 'w' :
-                    e.target.className.includes('pm-resize-s') ? 's' : 'sw';
+                const startTop = panel.offsetTop;
+
+                // Determine direction based on which handle was clicked
+                let direction = '';
+                if (e.target.classList.contains('pm-resize-w')) direction = 'w';
+                else if (e.target.classList.contains('pm-resize-n')) direction = 'n';
+                else if (e.target.classList.contains('pm-resize-nw')) direction = 'nw';
 
                 const doDrag = (moveEvent) => {
+                    // Width adjustment (drag left edge)
                     if (direction.includes('w')) {
-                        const newWidth = startWidth + (startX - moveEvent.clientX);
-                        if (newWidth >= 300) { // Min width constraint
+                        const deltaX = startX - moveEvent.clientX;
+                        const newWidth = startWidth + deltaX;
+                        if (newWidth >= 300 && newWidth <= window.innerWidth - 50) {
                             panel.style.width = newWidth + 'px';
                             GM_setValue('pm_panel_width', newWidth);
                         }
                     }
-                    if (direction.includes('s')) {
-                        const newHeight = startHeight + (moveEvent.clientY - startY);
-                        if (newHeight >= 150) { // Min height constraint - reduced for compact view
+                    // Height adjustment (drag top edge - adjusts top position and height)
+                    if (direction.includes('n')) {
+                        const deltaY = startY - moveEvent.clientY;
+                        const newHeight = startHeight + deltaY;
+                        const newTop = startTop - deltaY;
+                        if (newHeight >= 150 && newTop >= 10) {
                             panel.style.height = newHeight + 'px';
+                            panel.style.top = newTop + 'px';
                             GM_setValue('pm_panel_height', newHeight);
+                            GM_setValue('pm_panel_top', newTop);
                         }
                     }
                 };
@@ -1198,15 +1211,17 @@
             };
 
             resizeW.addEventListener('mousedown', initResize);
-            resizeS.addEventListener('mousedown', initResize);
-            resizeSW.addEventListener('mousedown', initResize);
+            resizeN.addEventListener('mousedown', initResize);
+            resizeNW.addEventListener('mousedown', initResize);
 
-            // Restore saved size
+            // Restore saved size and position
             const savedWidth = GM_getValue('pm_panel_width', 400);
             const savedHeight = GM_getValue('pm_panel_height', window.innerHeight - 120);
+            const savedTop = GM_getValue('pm_panel_top', 70);
 
             panel.style.width = savedWidth + 'px';
             panel.style.height = savedHeight + 'px';
+            panel.style.top = savedTop + 'px';
             searchInput.oninput = (e) => {
                 searchQuery = e.target.value.toLowerCase();
                 renderAll();
