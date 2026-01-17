@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Polymarket Favorites Assistant
 // @namespace    https://polymarket.com/
-// @version      1.0.4
+// @version      1.0.5
 // @description  收藏市场和交易者，支持备注、标签、筛选和排序 | Track markets and traders with notes, tags, filters and sorting
 // @author       Polymarket Toolbox
 // @match        https://polymarket.com/*
@@ -294,7 +294,7 @@
             transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             /* Defaults, will be overridden by JS if resized */
             min-width: 300px;
-            min-height: 400px;
+            min-height: 150px;
         }
 
         /* Resize Handles */
@@ -1181,7 +1181,7 @@
                     }
                     if (direction.includes('s')) {
                         const newHeight = startHeight + (moveEvent.clientY - startY);
-                        if (newHeight >= 400) { // Min height constraint
+                        if (newHeight >= 150) { // Min height constraint - reduced for compact view
                             panel.style.height = newHeight + 'px';
                             GM_setValue('pm_panel_height', newHeight);
                         }
@@ -1388,8 +1388,17 @@
 
     function renderAll() {
         renderFilters();
+        // Always update both counts regardless of active tab
+        updateBadgeCounts();
         if (activeTab === 'markets') renderMarkets();
         else renderTraders();
+    }
+
+    function updateBadgeCounts() {
+        const marketCount = document.getElementById('pm-market-count');
+        const traderCount = document.getElementById('pm-trader-count');
+        if (marketCount) marketCount.textContent = favoriteMarkets.length;
+        if (traderCount) traderCount.textContent = favoriteTraders.length;
     }
 
     function renderFilters() {

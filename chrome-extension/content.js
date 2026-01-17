@@ -1,5 +1,5 @@
 // Polymarket Favorites Assistant (Chrome Extension)
-// Version 1.0.4
+// Version 1.0.5
 
 (function () {
     'use strict';
@@ -313,7 +313,7 @@
             transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             /* Defaults, will be overridden by JS if resized */
             min-width: 300px;
-            min-height: 400px;
+            min-height: 150px;
         }
 
         /* Resize Handles */
@@ -1176,7 +1176,7 @@
                     }
                     if (direction.includes('s')) {
                         const newHeight = startHeight + (moveEvent.clientY - startY);
-                        if (newHeight >= 400) { // Min height constraint
+                        if (newHeight >= 150) { // Min height constraint - reduced for compact view
                             panel.style.height = newHeight + 'px';
                             chrome.storage.local.set({ pm_panel_height: newHeight });
                         }
@@ -1380,8 +1380,17 @@
 
     function renderAll() {
         renderFilters();
+        // Always update both counts regardless of active tab
+        updateBadgeCounts();
         if (activeTab === 'markets') renderMarkets();
         else renderTraders();
+    }
+
+    function updateBadgeCounts() {
+        const marketCount = document.getElementById('pm-market-count');
+        const traderCount = document.getElementById('pm-trader-count');
+        if (marketCount) marketCount.textContent = favoriteMarkets.length;
+        if (traderCount) traderCount.textContent = favoriteTraders.length;
     }
 
     function renderFilters() {
